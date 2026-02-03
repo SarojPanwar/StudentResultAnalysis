@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
-import os
 from matplotlib.ticker import MaxNLocator
 
 
@@ -90,50 +89,78 @@ def main():
         st.stop()
 
     df_analyzed, SUBJECT_COLS = analysis_result
+    result_counts = df_analyzed['Final_Result'].value_counts()
+    pass_rate = (result_counts.get('Pass', 0) / len(df_analyzed)) * 100
 
     st.header("📊 Final Results Overview")
     st.info(f"Analysis based on: Individual Subject $\\ge {ind_thresh}$ and Total $\\ge {ovr_thresh}$")
 
     st.dataframe(df_analyzed, use_container_width=True)
 
-    col1, col2 = st.columns(2)
+    # col1, col2 = st.columns(2)
+    col1,col2 = st.columns([1,1],gap="large")
 
     with col1:
         st.subheader("Distribution of Total Marks")
         fig, ax = plt.subplots(figsize=(8, 5))
-        sns.histplot(df_analyzed['Total'], bins=5, kde=True, color='#4c72b0', ax=ax)
-        ax.set_title('Distribution of Total Marks', fontsize=14)
-        ax.set_xlabel('Total Marks', fontsize=10)
-        ax.set_ylabel('Number of Students', fontsize=10)
-        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        sns.histplot(
+            df_analyzed['Total'], 
+            bins=5, 
+            kde=True, 
+            color='#4c72b0', 
+            edgecolor='black',
+            alpha=0.8,
+            linewidth=1.2,
+            ax=ax)
+        # ax.set_title('Distribution of Total Marks', fontsize=14)
+        ax.set_xlabel('Total Marks', fontsize=11)
+        ax.set_ylabel('Number of Students', fontsize=11)
+        ax.grid(axis='y', linestyle='--', alpha=0.6)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        plt.tight_layout()
         st.pyplot(fig)
+        plt.close(fig)
 
     with col2:
         st.subheader("Final Pass vs Fail Count")
         result_counts = df_analyzed['Final_Result'].value_counts()
         colors = {'Pass': '#66c2a5', 'Fail': '#fc8d62'}
         fig, ax = plt.subplots(figsize=(8, 5))
-        bars = ax.bar(result_counts.index, result_counts.values,
-                      color=[colors.get(label, 'gray') for label in result_counts.index])
-        ax.set_title('Final Pass vs Fail Count', fontsize=14)
-        ax.set_xlabel('Result', fontsize=10)
-        ax.set_ylabel('Number of Students', fontsize=10)
+        bars = ax.bar(
+            result_counts.index, 
+            result_counts.values,
+            color=[colors.get(label, 'gray') for label in result_counts.index],
+            width=0.6
+                    )
+        # ax.set_title('Final Pass vs Fail Count', fontsize=14)
+        ax.set_xlabel('Result', fontsize=11)
+        ax.set_ylabel('Number of Students', fontsize=11)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
         for bar in bars:
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width() / 2., height + 0.1,
-                      f'{int(height)}',
-                      ha='center', va='bottom', fontsize=10)
+            ax.text(
+                bar.get_x() + bar.get_width() / 2., 
+                height + 0.1,
+                f'{int(height)}',
+                ha='center', 
+                va='bottom', 
+                fontsize=10,
+                fontweight='bold')
 
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        plt.tight_layout()
         st.pyplot(fig)
+        plt.close(fig)
 
     st.markdown("---")
     st.subheader("Raw Data Summary")
     st.write(f"Total students analyzed: **{len(df_analyzed)}**")
     st.write(f"Subject columns detected: **{', '.join(SUBJECT_COLS)}**")
-
+    st.write(f"Pass Rate :**{pass_rate:.1f}%**")
+    
+       
 
     st.markdown("---")
     st.header("🧮 Predict Result for a New Student")
