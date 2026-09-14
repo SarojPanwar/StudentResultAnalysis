@@ -9,7 +9,7 @@ This system is designed for **future enhancement using Machine Learning (Supervi
 
 ## Project Type
 
- Academic Group Project  
+ Academic Project  
  Developed as part of college/university coursework  
  Educational & learning-focused project
 
